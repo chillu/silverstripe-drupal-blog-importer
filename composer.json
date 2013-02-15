@@ -1,0 +1,21 @@
+{
+	"name": "silverstripe/drupal-blog-importer",
+	"type": "silverstripe-module",
+	"description": "Converts Drupal Blogs to the SilverStripe Blog module data structures",
+	"homepage": "http://silverstripe.org",
+	"license": "BSD-3-Clause",
+	"keywords": ["silverstripe", "cms"],
+	"authors": [
+		{
+			"name": "Ingo Schommer",
+			"homepage": "http://silverstripe.com"
+		}
+	],
+	"require": {
+		"php": ">=5.3.2",
+		"composer/installers": "*",
+		"silverstripe/framework": "3.0.*",
+		"silverstripe/blog": "*",
+		"silverstripe/comments": "*"
+	}
+}
