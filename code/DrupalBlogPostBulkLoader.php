@@ -15,7 +15,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		'body' => '->importContent',
 		'changed' => 'LastEdited',
 		'created' => '->importCreated',
-		'tags' => 'Tags',
+		'tags' => '->importTags',
 		'author_title' => '->importAuthor',
 	);
 
@@ -46,7 +46,10 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	protected function getHolder($record) {
 		$filter = new URLSegmentFilter();
 		$urlSegment = $filter->filter($record['blog_path']);
-		$holder = BlogHolder::get()->filter('URLSegment', $urlSegment)->First();
+		$holder = BlogHolder::get()->filter(array(
+			'URLSegment' => $urlSegment,
+			'ParentID' => $this->parentId
+		))->First();
 		if(!$holder) {
 			$holder = new BlogHolder(array(
 				'Title' => $record['blog_title'],
@@ -91,6 +94,12 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	protected function importAuthor($obj, $val, $record) {
 		$obj->Author = $val;
+	}
+
+	protected function importTags($obj, $val, $record) {
+		$tags = explode(',', $val);
+		$val = array_map('trim', $tags);
+		$obj->Tags = implode(', ', $tags);
 	}
 
 	/**
