@@ -22,7 +22,7 @@ class DrupalBlogImporterTask extends BuildTask {
 	public function run($request) {
 		$postFile = $request->getVar('postFile');
 		$userFile = $request->getVar('userFile');
-		$blogFile = $request->getVar('blogFile');
+		$commentFile = $request->getVar('commentFile');
 		
 		if($postFile && file_exists($postFile)) {
 			$this->log('Importing posts...');
