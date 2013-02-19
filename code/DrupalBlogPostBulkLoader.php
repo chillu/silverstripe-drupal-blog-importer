@@ -98,7 +98,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	protected function importTags($obj, $val, $record) {
 		$tags = explode(',', $val);
-		$val = array_map('trim', $tags);
+		$tags = array_map('trim', $tags);
 		$obj->Tags = implode(', ', $tags);
 	}
 
