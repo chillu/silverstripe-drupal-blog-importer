@@ -9,6 +9,8 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	protected $urlMap = array();
 
+	protected $publish = false;
+
 	public $columnMap = array(
 		'nid' => 'DrupalNid', // requires the DrupalBlogEntryExtension
 		'title' => 'Title',
@@ -37,6 +39,8 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		$objID = parent::processRecord($record, $columnMap, $result, $preview);
 		$obj = BlogEntry::get()->byID($objID);
 
+		if($this->publish) $obj->publish('Stage', 'Live');
+
 		$this->urlMap[$record['dst']] = $obj->RelativeLink();
 	}
 
@@ -57,6 +61,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 				'ParentID' => $this->parentId,
 			));
 			$holder->write();
+			if($this->publish) $holder->publish('Stage', 'Live');
 		}
 		return $holder;
 	}
@@ -114,10 +119,20 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	public function setParentId($id) {
 		$this->parentId = $id;
+		return $this;
 	}
 
 	public function getParentId() {
 		return $this->parentId;
+	}
+
+	public function setPublish($bool) {
+		$this->publish = $bool;
+		return $this;
+	}
+
+	public function getPublish() {
+		return $this->publish;
 	}
 	
 }

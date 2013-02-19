@@ -23,10 +23,11 @@ class DrupalBlogImporterTask extends BuildTask {
 		$postFile = $request->getVar('postFile');
 		$userFile = $request->getVar('userFile');
 		$commentFile = $request->getVar('commentFile');
+		$doPublish = $request->getVar('publish');
 		
 		if($postFile && file_exists($postFile)) {
 			$this->log('Importing posts...');
-			$postResult = $this->getPostLoader()->load($postFile);
+			$postResult = $this->getPostLoader()->setPublish($doPublish)->load($postFile);
 			$this->log(sprintf(
 				'Created %d, updated %d, deleted %d',
 				$postResult->CreatedCount(),
