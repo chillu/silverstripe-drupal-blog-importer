@@ -50,19 +50,32 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	protected function getHolder($record) {
 		$filter = new URLSegmentFilter();
 		$urlSegment = $filter->filter($record['blog_path']);
+		$tree = BlogTree::get()->filter(array(
+			'Title' => 'Blogs'
+		))->First();
+		if(!$tree) {
+			$tree = new BlogTree(array(
+				'Title' => 'Blogs',
+				'ParentID' => $this->parentId,
+			));
+			$tree->write();
+			if($this->publish) $tree->publish('Stage', 'Live');
+		}
+
 		$holder = BlogHolder::get()->filter(array(
 			'URLSegment' => $urlSegment,
-			'ParentID' => $this->parentId
+			'ParentID' => $tree->ID
 		))->First();
 		if(!$holder) {
 			$holder = new BlogHolder(array(
 				'Title' => $record['blog_title'],
 				'URLSegment' => $urlSegment,
-				'ParentID' => $this->parentId,
+				'ParentID' => $tree->ID,
 			));
 			$holder->write();
 			if($this->publish) $holder->publish('Stage', 'Live');
 		}
+
 		return $holder;
 	}
 
