@@ -10,7 +10,7 @@ SELECT
 	'body',
 	'teaser',
 	'vid',
-	-- 'dst',
+	'dst',
 	'blog_coid',
 	'blog_title',
 	'blog_path',
@@ -28,7 +28,7 @@ SELECT
 	REPLACE(IFNULL(cp_node_revisions.body, ''), '\r\n', '\n') AS body,
 	REPLACE(IFNULL(cp_node_revisions.teaser, ''), '\r\n', '\n') AS teaser,
 	cp_node_revisions.vid,
-	-- cp_url_alias.dst,
+	cp_url_alias.dst,
 	cp_column_list.coid AS blog_coid,
 	cp_column_list.title AS blog_title,
 	cp_column_list.path AS blog_path,
@@ -44,7 +44,7 @@ FROM
 	LEFT JOIN cp_term_data ON cp_term_data.tid = cp_term_node.tid
 	LEFT JOIN cp_vocabulary_node_types ON cp_vocabulary_node_types.vid = cp_term_data.vid
 	LEFT JOIN cp_vocabulary ON cp_vocabulary.vid = cp_vocabulary_node_types.vid
-	-- LEFT JOIN cp_url_alias ON cp_url_alias.src = CONCAT('node/', cp_node.nid)
+	LEFT JOIN cp_url_alias ON cp_url_alias.src = CONCAT('node/', cp_node.nid)
 	LEFT JOIN cp_node as usernodes ON usernodes.uid = cp_node.uid AND usernodes.type = 'usernode'
 WHERE 
 	cp_vocabulary_node_types.type = 'column'
