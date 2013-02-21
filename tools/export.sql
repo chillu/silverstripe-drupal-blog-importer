@@ -1,3 +1,4 @@
+SET NAMES utf8;
 SELECT
 	'nid',
 	'title',
