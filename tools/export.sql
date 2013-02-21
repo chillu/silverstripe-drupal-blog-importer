@@ -25,8 +25,8 @@ SELECT
 	cp_node.status,
 	FROM_UNIXTIME(cp_node.created) AS created,
 	FROM_UNIXTIME(cp_node.changed) AS changed,
-	REPLACE(cp_node_revisions.body, '\n', '') AS body,
-	REPLACE(cp_node_revisions.teaser, '\n', '') AS teaser,
+	REPLACE(IFNULL(cp_node_revisions.body, ''), '\r\n', '\n') AS body,
+	REPLACE(IFNULL(cp_node_revisions.teaser, ''), '\r\n', '\n') AS teaser,
 	cp_node_revisions.vid,
 	-- cp_url_alias.dst,
 	cp_column_list.coid AS blog_coid,
@@ -55,7 +55,7 @@ INTO OUTFILE '/tmp/posts.csv'
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 ESCAPED BY '"'
-LINES TERMINATED BY '\n';
+LINES TERMINATED BY '\r\n';
 
 SELECT
 	'cid',
@@ -73,10 +73,10 @@ SELECT
 	cp_comments.cid,
 	cp_comments.nid,
 	cp_comments.uid,
-	cp_comments.subject,
-	REPLACE(cp_comments.comment, '\n', '') AS comment,
+	REPLACE(IFNULL(cp_comments.subject, ''), '\r\n', '\n') AS subject,
+	REPLACE(IFNULL(cp_comments.comment, ''), '\r\n', '\n') AS comment,
 	cp_comments.hostname,
-	cp_comments.timestamp,
+	FROM_UNIXTIME(cp_comments.timestamp) AS 'timestamp',
 	cp_comments.name,
 	cp_comments.mail,
 	cp_comments.homepage
@@ -86,4 +86,4 @@ INTO OUTFILE '/tmp/comments.csv'
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 ESCAPED BY '"'
-LINES TERMINATED BY '\n';
+LINES TERMINATED BY '\r\n';
