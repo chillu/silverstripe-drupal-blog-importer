@@ -6,7 +6,7 @@
  */
 class DrupalBlogImporterTask extends BuildTask {
 
-	protected $commentsLoader;
+	protected $commentLoader;
 
 	protected $userLoader;
 
@@ -54,7 +54,7 @@ class DrupalBlogImporterTask extends BuildTask {
 		// 	));
 		// }
 		if($commentFile && file_exists($commentFile)) {
-			$this->log('Importing users...');
+			$this->log('Importing comments...');
 			$commentResult = $this->getCommentLoader()->load($commentFile);
 		} else {
 			$this->log(sprintf(
@@ -64,9 +64,9 @@ class DrupalBlogImporterTask extends BuildTask {
 		}
 	}
 
-	public function getCommentsLoader() {
-		if(!$this->commentsLoader) $this->commentsLoader = new DrupalBlogCommentBulkLoader();
-		return $this->commentsLoader;
+	public function getCommentLoader() {
+		if(!$this->commentLoader) $this->commentLoader = new DrupalBlogCommentBulkLoader();
+		return $this->commentLoader;
 	}
 
 	public function getPostLoader() {
