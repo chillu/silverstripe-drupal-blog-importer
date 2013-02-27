@@ -20,10 +20,15 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 	public function __construct($objectClass = 'Member') {
 		parent::__construct($objectClass);
 
-		if(
-			!singleton($objectClass)->hasDatabaseField($this->columnMap['uid'])
+		$canMapUid = (
+			isset($this->columnMap['uid']) 
+			&& !singleton($objectClass)->hasDatabaseField($this->columnMap['uid'])
+		);
+		$canMapTitle = (
+			isset($this->columnMap['title']) 
 			&& !singleton($objectClass)->hasDatabaseField($this->columnMap['title'])
-		) {
+		);
+		if(!$canMapUid && !$canMapTitle) {
 			throw new LogicException(sprintf(
 				'The user importer requires a unique identifier field for "uid" or "title" ' .
 				'(expected "%s" or "%s")',

@@ -1,4 +1,4 @@
 "cid","nid","uid","subject","comment","hostname","timestamp","name","mail","homepage"
-"1","1234","30635","comment1 subject","comment1 content on post1","72.188.142.93","2009-06-29 19:39:26","user1","user1@test.com","user1.com"
-"2","1235","30635","comment2 subject","comment2 content on post1","72.188.142.93","2009-06-29 19:39:26","user1","user1@test.com","user1.com"
-"3","1236","30635","comment3 subject","comment3 content on post2","72.188.142.93","2009-06-29 19:39:26","user2","user2@test.com","user2.com"
+"1","1234","201","comment1 subject","comment1 content on post1","72.188.142.93","2009-06-29 19:39:26","user1","user1@test.com","user1.com"
+"2","1235","201","comment2 subject","comment2 content on post1","72.188.142.93","2009-06-29 19:39:26","user1","user1@test.com","user1.com"
+"3","1236","202","comment3 subject","comment3 content on post2","72.188.142.93","2009-06-29 19:39:26","user2","user2@test.com","user2.com"

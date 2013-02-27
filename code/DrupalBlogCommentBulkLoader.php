@@ -4,6 +4,7 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	public $columnMap = array(
 		'nid' => 'nid',
 		'cid' => 'cid',
+		'uid' => '->importUser',
 		'subject' => 'Subject', // requires DrupalCommentExtension
 		'name' => 'Name',
 		'mail' => 'Email',
@@ -73,6 +74,29 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 
 	protected function importComment($obj, $val, $record) {
 		$obj->Comment = $this->cleanupHtml($val);
+	}
+
+	protected function importUser($obj, $val, $record) {
+		if(!$val || !singleton('Member')->hasDatabaseField('DrupalUid')) return;
+
+		// Try importing by UID
+		$member = Member::get()->filter('DrupalUid', $val)->First();
+
+		// Fall back to Nickname
+		if(!$member) $member = Member::get()->filter('Nickname', $record['Name'])->First();
+
+		// Fall back to creating a member
+		if(!$member) {
+			$member = new Member(array(
+				'DrupalUid' => $val,
+				'Nickname' => $record['Name'],
+			));
+			$member->write();
+		}
+		if($member) {
+			$obj->AuthorID = $member->ID;
+			$obj->write();
+		}
 	}
 
 	/**
