@@ -21,6 +21,10 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	
 	public function __construct($objectClass = 'Comment') {
 		parent::__construct($objectClass);
+
+		if(!class_exists('Comment')) {
+			throw new LogicException('The "comments" module is not installed, can not import comments');
+		}
 	}
 
 	protected function getPage($record) {
@@ -30,11 +34,17 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	protected function processRecord($record, $columnMap, &$result, $preview = false) {
 		$page = $this->getPage($record);
 		if(!$page) {
-			throw new LogicException(sprintf(
-				'No page #%s found for comment #%s',
-				$record['nid'],
-				$record['cid']
+			// Mainly for testing, in real imports the posts should be present already
+			$holder = BlogHolder::get()->First();
+			if(!$holder) {
+				$holder = new BlogHolder();
+				$holder->write();
+			}
+			$page = new BlogEntry(array(
+				'DrupalNid' => $record['nid'],
+				'ParentID' => $holder->ID
 			));
+			$page->write();
 		}
 		$record['ParentID'] = $page->ID;
 		$record['BaseClass'] = 'SiteTree';

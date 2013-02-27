@@ -70,17 +70,17 @@ class DrupalBlogImporterTask extends BuildTask {
 	}
 
 	public function getCommentLoader() {
-		if(!$this->commentLoader) $this->commentLoader = new DrupalBlogCommentBulkLoader();
+		if(!$this->commentLoader) $this->commentLoader = Injection::inst()->create('DrupalBlogCommentBulkLoader');
 		return $this->commentLoader;
 	}
 
 	public function getPostLoader() {
-		if(!$this->postLoader) $this->postLoader = new DrupalBlogPostBulkLoader();
+		if(!$this->postLoader) $this->postLoader = Injection::inst()->create('DrupalBlogPostBulkLoader');
 		return $this->postLoader;
 	}
 
 	public function getUserLoader() {
-		if(!$this->userLoader) $this->userLoader = new DrupalBlogUserBulkLoader();
+		if(!$this->userLoader) $this->userLoader = Injection::inst()->create('DrupalBlogUserBulkLoader');
 		return $this->userLoader;
 	}
 
