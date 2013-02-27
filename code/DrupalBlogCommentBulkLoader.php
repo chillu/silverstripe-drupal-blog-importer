@@ -56,6 +56,8 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 		// Created gets overwritten on new records...
 		$obj->Created = $record['Created'];
 		$obj->write();
+
+		return $objId;
 	}
 
 	/**

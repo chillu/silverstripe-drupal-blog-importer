@@ -42,6 +42,8 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		if($this->publish) $obj->publish('Stage', 'Live');
 
 		$this->urlMap[$record['dst']] = $obj->RelativeLink();
+
+		return $objID;
 	}
 
 	/**
