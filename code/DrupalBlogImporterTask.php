@@ -29,6 +29,12 @@ class DrupalBlogImporterTask extends BuildTask {
 		if($userFile && file_exists($userFile)) {
 			$this->log('Importing users...');
 			$userResult = $this->getUserLoader()->load($userFile);
+			$this->log(sprintf(
+				'Created %d, updated %d, deleted %d',
+				$userResult->CreatedCount(),
+				$userResult->UpdatedCount(),
+				$userResult->DeletedCount()
+			));
 		} else {
 			$this->log(sprintf(
 				'Skipping user import, no "userFile" found (path: "%s")',
@@ -57,6 +63,12 @@ class DrupalBlogImporterTask extends BuildTask {
 		if($commentFile && file_exists($commentFile)) {
 			$this->log('Importing comments...');
 			$commentResult = $this->getCommentLoader()->load($commentFile);
+			$this->log(sprintf(
+				'Created %d, updated %d, deleted %d',
+				$commentResult->CreatedCount(),
+				$commentResult->UpdatedCount(),
+				$commentResult->DeletedCount()
+			));
 		} else {
 			$this->log(sprintf(
 				'Skipping comment import, no "commentFile" found (path: "%s")',
