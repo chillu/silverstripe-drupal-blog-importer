@@ -46,10 +46,6 @@ class DrupalBlogImporterTask extends BuildTask {
 				$postResult->UpdatedCount(),
 				$postResult->DeletedCount()
 			));
-			$this->log(sprintf(
-				"Rewrite rules for Apache: \n\n%s",
-				$this->getPostLoader()->getRewriteRules()
-			));
 		} else {
 			$this->log(sprintf(
 				'Skipping post import, no "postFile" found (path: "%s")',
@@ -67,20 +63,26 @@ class DrupalBlogImporterTask extends BuildTask {
 				$commentFile
 			));
 		}
+
+		if($rules = $this->getPostLoader()->getRewriteRules()) {
+			$this->log('-----------------------------------------------');
+			$this->log(sprintf("Rewrite rules for Apache: \n\n%s", $rules));
+		}
+		
 	}
 
 	public function getCommentLoader() {
-		if(!$this->commentLoader) $this->commentLoader = Injection::inst()->create('DrupalBlogCommentBulkLoader');
+		if(!$this->commentLoader) $this->commentLoader = Injector::inst()->create('DrupalBlogCommentBulkLoader');
 		return $this->commentLoader;
 	}
 
 	public function getPostLoader() {
-		if(!$this->postLoader) $this->postLoader = Injection::inst()->create('DrupalBlogPostBulkLoader');
+		if(!$this->postLoader) $this->postLoader = Injector::inst()->create('DrupalBlogPostBulkLoader');
 		return $this->postLoader;
 	}
 
 	public function getUserLoader() {
-		if(!$this->userLoader) $this->userLoader = Injection::inst()->create('DrupalBlogUserBulkLoader');
+		if(!$this->userLoader) $this->userLoader = Injector::inst()->create('DrupalBlogUserBulkLoader');
 		return $this->userLoader;
 	}
 

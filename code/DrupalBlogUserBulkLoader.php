@@ -22,11 +22,11 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 
 		$canMapUid = (
 			isset($this->columnMap['uid']) 
-			&& !singleton($objectClass)->hasDatabaseField($this->columnMap['uid'])
+			&& singleton($objectClass)->hasDatabaseField($this->columnMap['uid'])
 		);
 		$canMapTitle = (
 			isset($this->columnMap['title']) 
-			&& !singleton($objectClass)->hasDatabaseField($this->columnMap['title'])
+			&& singleton($objectClass)->hasDatabaseField($this->columnMap['title'])
 		);
 		if(!$canMapUid && !$canMapTitle) {
 			throw new LogicException(sprintf(
