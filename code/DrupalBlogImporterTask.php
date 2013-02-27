@@ -24,7 +24,19 @@ class DrupalBlogImporterTask extends BuildTask {
 		$userFile = $request->getVar('userFile');
 		$commentFile = $request->getVar('commentFile');
 		$doPublish = $request->getVar('publish');
+
+		// Import users: Needs to happen first so we can establish relations later
+		if($userFile && file_exists($userFile)) {
+			$this->log('Importing users...');
+			$userResult = $this->getUserLoader()->load($userFile);
+		} else {
+			$this->log(sprintf(
+				'Skipping user import, no "userFile" found (path: "%s")',
+				$userFile
+			));
+		}
 		
+		// Import blog posts
 		if($postFile && file_exists($postFile)) {
 			$this->log('Importing posts...');
 			$postResult = $this->getPostLoader()->setPublish($doPublish)->load($postFile);
@@ -44,15 +56,8 @@ class DrupalBlogImporterTask extends BuildTask {
 				$postFile
 			));
 		}
-		// if($userFile && file_exists($userFile)) {
-		// 	$this->log('Importing users...');
-		// 	$userResult = $this->getUserLoader()->load($userFile);
-		// } else {
-		// 	$this->log(sprintf(
-		// 		'Skipping user import, no "userFile" found (path: "%s")',
-		// 		$userFile
-		// 	));
-		// }
+		
+		// Import comments
 		if($commentFile && file_exists($commentFile)) {
 			$this->log('Importing comments...');
 			$commentResult = $this->getCommentLoader()->load($commentFile);

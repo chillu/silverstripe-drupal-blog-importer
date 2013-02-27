@@ -1,3 +1,35 @@
+-- Export users
+SELECT
+	'nid',
+	'uid',
+	'title',
+	'created',
+	'changed'
+UNION ALL
+SELECT
+	users.nid,
+	users.uid,
+	users.title,
+	FROM_UNIXTIME(users.created) AS 'created',
+	FROM_UNIXTIME(users.changed) AS 'changed'
+FROM 
+	cp_node AS users
+	LEFT JOIN cp_comments ON cp_comments.uid = users.uid
+	LEFT JOIN cp_node AS blogposts ON blogposts.uid = users.uid AND blogposts.type = 'column'
+WHERE
+	users.type = 'usernode'
+	AND (
+		cp_comments.nid IS NOT NULL
+		OR blogposts.nid IS NOT NULL
+	)
+GROUP BY users.uid
+INTO OUTFILE '/tmp/users.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+ESCAPED BY '"'
+LINES TERMINATED BY '\r\n';
+
+-- Export posts
 SET NAMES utf8;
 SELECT
 	'nid',
@@ -57,6 +89,7 @@ ENCLOSED BY '"'
 ESCAPED BY '"'
 LINES TERMINATED BY '\r\n';
 
+-- Export comments
 SELECT
 	'cid',
 	'nid',
