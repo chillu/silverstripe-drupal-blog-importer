@@ -13,5 +13,5 @@ before_script:
  - cd ~/builds/ss
 
 script: 
- - phpunit viewcounter/tests/
+ - phpunit drupal-blog-importer/tests/
  - phpcs --encoding=utf-8 --tab-width=4 --standard=framework/tests/phpcs -np viewcounter
