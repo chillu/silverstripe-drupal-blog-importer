@@ -24,11 +24,6 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	 */
 	protected $imagePath = '/assets/blog';
 
-	/**
-	 * @var boolean Retain folder structure of images (a bit harder to migrate)
-	 */
-	protected $imageRetainFolders = false;
-
 	protected $publish = false;
 
 	public $columnMap = array(
@@ -76,17 +71,25 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 				preg_match('/src=["\'](.+?)["\']/', $imageTag[0], $imageUrlMatch);
 				if(!$imageUrlMatch) continue;
 
-				$imageUrl = $imageUrlMatch[1];
-				if(Director::is_absolute_url($imageUrl)) continue;
+				$oldImageUrl = $imageUrlMatch[1];
+				$oldImageUrlNormalized = $this->normalizeImageUrl($oldImageUrl);
+				if(Director::is_absolute_url($oldImageUrlNormalized)) continue;
 
 				// TODO Fix relative images
-				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($imageUrl, '/');
-				$this->images[$imageUrl] = $newImageUrl;
+				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($oldImageUrlNormalized, '/');
+				$this->images[$oldImageUrlNormalized] = $newImageUrl;
 				// TODO More robust replacement
-				$obj->Content = str_replace( $imageUrl, $newImageUrl, $obj->Content);
+				$obj->Content = str_replace($oldImageUrl, $newImageUrl, $obj->Content);
 			}
 			$obj->write();
 		}
+	}
+
+	/**
+	 * Allows advanced image url handling.
+	 */
+	protected function normalizeImageUrl($url) {
+		return $url;
 	}
 
 	/**
