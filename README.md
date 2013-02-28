@@ -49,6 +49,7 @@ commandline tool. Please note that the SQL user needs to have been granted
 
 The script assumes your column type for blog nodes is called 'column'.
 If its called something different (e.g. 'blog'), replace the value in the SQL script.
+Don't forget to add any table name prefixes should you have configured them.
 
 By default, the CSV data is exported to the `/tmp` folder. Change
 the script paths if you don't have access to this location.
