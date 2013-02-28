@@ -10,5 +10,9 @@ class DrupalCommentExtension extends DataExtension {
 		'Hostname' => 'Text',
 		'Email' => 'Text',
 	);
+
+	static $has_one = array(
+		'Author' => 'Member'
+	);
 	
 }

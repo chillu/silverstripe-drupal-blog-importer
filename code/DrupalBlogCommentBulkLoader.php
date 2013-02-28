@@ -3,7 +3,7 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 
 	public $columnMap = array(
 		'nid' => 'nid',
-		'cid' => 'cid',
+		'cid' => 'DrupalCid',
 		'uid' => '->importUser',
 		'subject' => 'Subject', // requires DrupalCommentExtension
 		'name' => 'Name',
@@ -15,8 +15,8 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	);
 
 	public $duplicateChecks = array(
-		'nid' => array(
-			'callback' => 'findDuplicateByNid'
+		'DrupalCid' => array(
+			'callback' => 'findDuplicateByCid'
 		)
 	);
 	
@@ -63,14 +63,12 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	/**
 	 * @return Comment
 	 */
-	protected function findDuplicateByNid($nid, $record) {
+	protected function findDuplicateByCid($cid, $record) {
 		$page = $this->getPage($record);
 		if(!$page) return;
 
 		return Comment::get()->filter(array(
-			'Name' => $record['Name'],
-			'Created' => $record['Created'],
-			'ParentID' => $page->ID
+			'DrupalCid' => $cid
 		))->First();
 	}
 
@@ -79,25 +77,29 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	}
 
 	protected function importUser($obj, $val, $record) {
-		if(!$val || !singleton('Member')->hasDatabaseField('DrupalUid')) return;
+		$hasMemberUid = singleton('Member')->hasDatabaseField('DrupalUid');
+		$hasCommentAuthorRel = singleton('Comment')->has_one('Author');
+		if($val && $hasMemberUid && $hasCommentAuthorRel) {
+			// Try importing by UID
+			$member = Member::get()->filter('DrupalUid', $val)->First();
 
-		// Try importing by UID
-		$member = Member::get()->filter('DrupalUid', $val)->First();
+			// Fall back to Nickname
+			if(!$member) $member = Member::get()->filter('Nickname', $record['Name'])->First();
 
-		// Fall back to Nickname
-		if(!$member) $member = Member::get()->filter('Nickname', $record['Name'])->First();
-
-		// Fall back to creating a member
-		if(!$member) {
-			$member = new Member(array(
-				'DrupalUid' => $val,
-				'Nickname' => $record['Name'],
-			));
-			$member->write();
-		}
-		if($member) {
-			$obj->AuthorID = $member->ID;
-			$obj->write();
+			// Fall back to creating a member
+			if(!$member) {
+				$member = new Member(array(
+					'DrupalUid' => $val,
+					'Nickname' => $record['Name'],
+				));
+				$member->write();
+			}
+			if($member) {
+				$obj->AuthorID = $member->ID;
+				$obj->write();
+			}
+		} else {
+			$obj->Name = $val;
 		}
 	}
 
