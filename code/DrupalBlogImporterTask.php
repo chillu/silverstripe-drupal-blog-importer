@@ -80,6 +80,11 @@ class DrupalBlogImporterTask extends BuildTask {
 			$this->log('-----------------------------------------------');
 			$this->log(sprintf("Rewrite rules for Apache: \n\n%s", $rules));
 		}
+
+		if($images = $this->getPostLoader()->getImages()) {
+			$this->log('-----------------------------------------------');
+			$this->log(sprintf("Image paths: \n\n%s", implode("\n", array_keys($images))));
+		}
 		
 	}
 

@@ -1,4 +1,6 @@
 <?php
+use Guzzle\Http\Client;
+
 /**
  * Optionally imports author information into an "Author" has_one relationship
  * on {@link BlogEntry}. The relationship needs to be added in custom code though.
@@ -13,16 +15,31 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	protected $urlMap = array();
 
+	protected $images = array();
+
+	/**
+	 * Path to which image links will be rewritten, relative
+	 * to SilverStripe webroot.
+	 * @var string
+	 */
+	protected $imagePath = '/assets/blog';
+
+	/**
+	 * @var boolean Retain folder structure of images (a bit harder to migrate)
+	 */
+	protected $imageRetainFolders = false;
+
 	protected $publish = false;
 
 	public $columnMap = array(
+		'uid' => '->importAuthor',
 		'nid' => 'DrupalNid', // requires the DrupalBlogEntryExtension
 		'title' => 'Title',
 		'body' => '->importContent',
 		'changed' => 'LastEdited',
 		'created' => '->importCreated',
 		'tags' => '->importTags',
-		'author_title' => '->importAuthor',
+		'author_title' => 'Author',
 	);
 
 	public $duplicateChecks = array(
@@ -43,11 +60,33 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		$objID = parent::processRecord($record, $columnMap, $result, $preview);
 		$obj = BlogEntry::get()->byID($objID);
 
+		if($this->imagePath) $this->rewriteImages($obj);
+
 		if($this->publish) $obj->publish('Stage', 'Live');
 
 		$this->urlMap[$record['dst']] = $obj->RelativeLink();
 
 		return $objID;
+	}
+
+	protected function rewriteImages($obj) {
+		preg_match_all('/<img[^>]*>/', $obj->Content, $imageTags, PREG_SET_ORDER);
+		if($imageTags) {
+			foreach($imageTags as $imageTag) {
+				preg_match('/src=["\'](.+?)["\']/', $imageTag[0], $imageUrlMatch);
+				if(!$imageUrlMatch) continue;
+
+				$imageUrl = $imageUrlMatch[1];
+				if(Director::is_absolute_url($imageUrl)) continue;
+
+				// TODO Fix relative images
+				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($imageUrl, '/');
+				$this->images[$imageUrl] = $newImageUrl;
+				// TODO More robust replacement
+				$obj->Content = str_replace( $imageUrl, $newImageUrl, $obj->Content);
+			}
+			$obj->write();
+		}
 	}
 
 	/**
@@ -220,6 +259,19 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	public function getPublish() {
 		return $this->publish;
+	}
+
+	public function getImages() {
+		return $this->images;
+	}
+
+	public function setImagePath($path) {
+		$this->imagePath = $path;
+		return $this;
+	}
+
+	public function getImagePath() {
+		return $this->imagePath;
 	}
 	
 }

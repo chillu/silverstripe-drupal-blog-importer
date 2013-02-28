@@ -1,0 +1,5 @@
+"nid","title","uid","author_title","status","created","changed","teaser","body","vid","dst","blog_coid","blog_title","blog_path","totalcount","tags"
+"3","post1 title","101","tpurdum","1","2009-06-12 20:31:05","2010-01-16 04:31:11","post1 teaser","post1 content <img title=""blubb"" src=""http://myhost.com/image.gif"" />","3","content/post1","1","blog1","blog1","613","tag1,tag2"
+"4","post2 title","102","tpurdum","1","2009-06-12 20:31:05","2010-01-16 04:31:11","post2 teaser","post2 content
+with newlines <img title=""blubb"" src=""/absolute/image.gif"" />","3","content/post2","1","blog2","blog2","613","tag2,tag3"
+"5","post3 title","101","tpurdum","1","2009-06-12 20:31:05","2010-01-16 04:31:11","post3 teaser","post3 content<img src=""relative/image.gif"" /> more content <img src=""relative/other_image.gif"" />","3","content/post3","1","blog1","blog1","613","tag1,tag2"
