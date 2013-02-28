@@ -1,6 +1,8 @@
 <?php
 class DrupalBlogUserBulkLoaderTest extends SapphireTest {
 
+	protected $usesDatabase = true;
+
 	protected $requiredExtensions = array(
 		'Member' => array('DrupalMemberExtension'),
 		'BlogEntry' => array('DrupalBlogEntryExtension'),
@@ -10,7 +12,6 @@ class DrupalBlogUserBulkLoaderTest extends SapphireTest {
 	public function testImport() {
 		$loader = new DrupalBlogUserBulkLoader();
 		$result = $loader->load(BASE_PATH . '/drupal-blog-importer/tests/fixtures/users.csv');
-		
 		$this->assertEquals(3, $result->CreatedCount());
 		$this->assertEquals(0, $result->UpdatedCount());
 

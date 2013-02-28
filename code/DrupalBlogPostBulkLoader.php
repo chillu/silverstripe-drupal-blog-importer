@@ -1,4 +1,8 @@
 <?php
+/**
+ * Optionally imports author information into an "Author" has_one relationship
+ * on {@link BlogEntry}. The relationship needs to be added in custom code though.
+ */
 class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	
 	/**
@@ -113,13 +117,81 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	}
 
 	protected function importAuthor($obj, $val, $record) {
-		$obj->Author = $val;
+		$hasAuthorRelation = (bool)singleton('BlogEntry')->has_one('Author');
+		$hasUidField = (bool)singleton('Member')->hasDatabaseField('DrupalUid');
+		$hasNicknameField = (bool)singleton('Member')->hasDatabaseField('Nickname');
+
+		if($hasAuthorRelation && ($hasUidField || $hasNicknameField)) {
+			$member = null;
+
+			// Try importing by UID
+			if(!$member && $hasUidField) {
+				$member = Member::get()->filter('DrupalUid', $val)->First();
+			}
+
+			// Fall back to Nickname
+			if(!$member && $hasNicknameField) {
+				$member = Member::get()->filter('Nickname', $record['Author'])->First();
+			}
+
+			// Fall back to creating a member
+			if(!$member) {
+				$member = new Member(array(
+					'DrupalUid' => $val,
+					'Nickname' => $record['Author'],
+				));
+				$member->write();
+			}
+			if($member) {
+				// Save record in correct hierarchy first
+				$holder = $this->getHolder($record);
+				$obj->ParentID = $holder->ID;
+
+				$obj->AuthorID = $member->ID;
+				$obj->write();
+			}	
+		} else {
+			$obj->Author = $val;
+		}
+		
 	}
 
 	protected function importTags($obj, $val, $record) {
-		$tags = explode(',', $val);
-		$tags = array_map('trim', $tags);
-		$obj->Tags = implode(', ', $tags);
+		if($obj->many_many('BlogCategories')) {
+			// Optionally import into many_many created by the "ioti/blogcategories" module
+			$holder = $this->getHolder($record);
+			$obj->ParentID = $holder->ID;
+			$obj->write(); // required so relation setting works
+
+			// Import to BlogCategory instead of tags text field
+			$tags = explode(',', $val);
+			$tags = array_map('trim', $tags);
+			$obj->BlogCategories()->removeAll();
+			foreach($tags as $tag) {
+				if(!$tag) continue;
+
+				$cat = BlogCategory::get()->filter(array(
+					'Title' => $tag,
+				))->First();
+				if(!$cat) {
+					$cat = new BlogCategory(array(
+						'Title' => $tag
+					));
+				}
+				
+				$cat->write();
+
+				$obj->BlogCategories()->add($cat);
+
+				// Not entirely accurate, since the title -> slug conversion rules 
+				// are slightly different between SS and Drupal. Should catch the majority though.
+				$this->urlMap['category/tag-list/' . $cat->URLSegment] = $cat->getLink();
+			}
+		} else {
+			$tags = explode(',', $val);
+			$tags = array_map('trim', $tags);
+			$obj->Tags = implode(', ', $tags);	
+		}
 	}
 
 	/**
