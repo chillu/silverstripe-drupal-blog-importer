@@ -1,5 +1,7 @@
 # Drupal Blog Importer for the SilverStripe Blog Module
 
+[![Build Status](https://secure.travis-ci.org/chillu/silverstripe-drupal-blog-importer.png)](http://travis-ci.org/chillu/silverstripe-drupal-blog-importer)
+
 Converts Drupal blog data into a SilverStripe blog (built with the 
 [blog module](https://github.com/silverstripe/silverstripe-blog)).
 

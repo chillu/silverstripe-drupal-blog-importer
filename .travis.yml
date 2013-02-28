@@ -1,0 +1,17 @@
+language: php 
+php: 
+ - 5.3
+ - 5.4
+
+env:
+ - TESTDB=MYSQL CORE_RELEASE=master
+
+before_script:
+ - pear -q install --onlyreqdeps pear/PHP_CodeSniffer
+ - phpenv rehash
+ - ./tests/travis/before_script ~/builds/ss 
+ - cd ~/builds/ss
+
+script: 
+ - phpunit viewcounter/tests/
+ - phpcs --encoding=utf-8 --tab-width=4 --standard=framework/tests/phpcs -np viewcounter
