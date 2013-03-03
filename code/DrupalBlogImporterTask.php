@@ -24,6 +24,12 @@ class DrupalBlogImporterTask extends BuildTask {
 		$userFile = $request->getVar('userFile');
 		$commentFile = $request->getVar('commentFile');
 		$doPublish = $request->getVar('publish');
+		$doDownload = $request->getVar('download');
+		$baseUrl = $request->getVar('baseurl');
+
+		if($doDownload && !$baseUrl) {
+			throw new InvalidArgumentException('Please specify a "baseurl" when using "download"=1');
+		}
 
 		// Import users: Needs to happen first so we can establish relations later
 		if($userFile && file_exists($userFile)) {
@@ -45,13 +51,28 @@ class DrupalBlogImporterTask extends BuildTask {
 		// Import blog posts
 		if($postFile && file_exists($postFile)) {
 			$this->log('Importing posts...');
-			$postResult = $this->getPostLoader()->setPublish($doPublish)->load($postFile);
+			$postLoader = $this->getPostLoader();
+			$postResult = $postLoader
+				->setPublish($doPublish)
+				->setDrupalBaseUrl($baseUrl)
+				->load($postFile);
 			$this->log(sprintf(
 				'Created %d, updated %d, deleted %d',
 				$postResult->CreatedCount(),
 				$postResult->UpdatedCount(),
 				$postResult->DeletedCount()
 			));
+
+			if($doDownload && $images = $postLoader->getImages()) {
+				$this->log(sprintf('Downloading %d assets for posts...', count($images)));
+				$downloader = new DrupalBlogAssetDownloader();
+				$batch = $downloader->download($images);
+				if($exceptions = $batch->getExceptions()) {
+					foreach($exceptions as $exception) {
+						$this->log($exception->getMessage());
+					}
+				}
+			}
 		} else {
 			$this->log(sprintf(
 				'Skipping post import, no "postFile" found (path: "%s")',

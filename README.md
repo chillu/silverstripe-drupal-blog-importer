@@ -10,6 +10,7 @@ Converts Drupal blog data into a SilverStripe blog (built with the
  * Imports blog authors and comment authors into `Member` records (optional)
  * Imports tags into many-many relationships created by the ["blogcategories" module](https://github.com/IOTI/silverstripe-blogcategories) (optional)
  * Rewrites relative images in blog post body to a custom local folder (for manual migration)
+ * Downloads relative images and rewrites them into a provided folder (optional)
  * Import posts from different blogs into different "blog holders"
  * Based on available CSV data, no Drupal module installation or application access required
  * Supports incremental imports and updates

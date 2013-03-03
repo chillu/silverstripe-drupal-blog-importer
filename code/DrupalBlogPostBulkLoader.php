@@ -24,6 +24,13 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	 */
 	protected $imagePath = '/assets/blog';
 
+	/**
+	 * Optional base URL for the old Drupal installation
+	 * in order to rewrite images effectively.
+	 * @var String
+	 */
+	protected $drupalBaseUrl;
+
 	protected $publish = false;
 
 	public $columnMap = array(
@@ -55,7 +62,9 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		$objID = parent::processRecord($record, $columnMap, $result, $preview);
 		$obj = BlogEntry::get()->byID($objID);
 
-		if($this->imagePath) $this->rewriteImages($obj);
+		if($this->getImagePath()) {
+			$this->rewriteImages($obj);
+		}
 
 		if($this->publish) $obj->publish('Stage', 'Live');
 
@@ -73,11 +82,13 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 				$oldImageUrl = $imageUrlMatch[1];
 				$oldImageUrlNormalized = $this->normalizeImageUrl($oldImageUrl);
+				
+				// Ignore absolute urls since they'll continue to work
 				if(Director::is_absolute_url($oldImageUrlNormalized)) continue;
 
 				// TODO Fix relative images
 				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($oldImageUrlNormalized, '/');
-				$this->images[$oldImageUrlNormalized] = $newImageUrl;
+				$this->images[$this->getDrupalBaseUrl() . $oldImageUrlNormalized] = $newImageUrl;
 				// TODO More robust replacement
 				$obj->Content = str_replace($oldImageUrl, $newImageUrl, $obj->Content);
 			}
@@ -89,6 +100,10 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	 * Allows advanced image url handling.
 	 */
 	protected function normalizeImageUrl($url) {
+		if($baseUrl = $this->getDrupalBaseUrl()) {
+			$url = str_replace($baseUrl, '', $url);	
+		}
+		
 		return $url;
 	}
 
@@ -275,6 +290,15 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 	public function getImagePath() {
 		return $this->imagePath;
+	}
+
+	public function setDrupalBaseUrl($url) {
+		$this->drupalBaseUrl = $url;
+		return $this;
+	}
+
+	public function getDrupalBaseUrl() {
+		return $this->drupalBaseUrl;
 	}
 	
 }

@@ -1,6 +1,8 @@
 <?php
 class DrupalBlogPostBulkLoaderTest extends SapphireTest {
 
+	protected $usesDatabase = true;
+
 	protected $requiredExtensions = array(
 		'Member' => array('DrupalMemberExtension'),
 		'BlogEntry' => array('DrupalBlogEntryExtension'),
@@ -32,6 +34,7 @@ class DrupalBlogPostBulkLoaderTest extends SapphireTest {
 		$this->assertEquals(3, $result->CreatedCount());
 
 		$images = $loader->getImages();
+
 		$this->assertArrayHasKey('/absolute/image.gif', $images);
 		$this->assertArrayHasKey('relative/image.gif', $images);
 		$this->assertArrayHasKey('relative/other_image.gif', $images);
