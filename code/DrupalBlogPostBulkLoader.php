@@ -29,7 +29,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	 * in order to rewrite images effectively.
 	 * @var String
 	 */
-	protected $drupalBaseUrl;
+	protected $oldBaseUrl;
 
 	protected $publish = false;
 
@@ -88,7 +88,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 				// TODO Fix relative images
 				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($oldImageUrlNormalized, '/');
-				$this->images[$this->getDrupalBaseUrl() . $oldImageUrlNormalized] = $newImageUrl;
+				$this->images[$this->getOldBaseUrl() . $oldImageUrlNormalized] = $newImageUrl;
 				// TODO More robust replacement
 				$obj->Content = str_replace($oldImageUrl, $newImageUrl, $obj->Content);
 			}
@@ -100,7 +100,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	 * Allows advanced image url handling.
 	 */
 	protected function normalizeImageUrl($url) {
-		if($baseUrl = $this->getDrupalBaseUrl()) {
+		if($baseUrl = $this->getOldBaseUrl()) {
 			$url = str_replace($baseUrl, '', $url);	
 		}
 		
@@ -292,13 +292,13 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		return $this->imagePath;
 	}
 
-	public function setDrupalBaseUrl($url) {
-		$this->drupalBaseUrl = $url;
+	public function setOldBaseUrl($url) {
+		$this->oldBaseUrl = $url;
 		return $this;
 	}
 
-	public function getDrupalBaseUrl() {
-		return $this->drupalBaseUrl;
+	public function getOldBaseUrl() {
+		return $this->oldBaseUrl;
 	}
 	
 }

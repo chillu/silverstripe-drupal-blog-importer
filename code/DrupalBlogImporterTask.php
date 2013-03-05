@@ -25,10 +25,11 @@ class DrupalBlogImporterTask extends BuildTask {
 		$commentFile = $request->getVar('commentFile');
 		$doPublish = $request->getVar('publish');
 		$doDownload = $request->getVar('download');
-		$baseUrl = $request->getVar('baseurl');
+		$oldBaseUrl = $request->getVar('oldBaseUrl');
+		$newBaseUrl = $request->getVar('newBaseUrl');
 
-		if($doDownload && !$baseUrl) {
-			throw new InvalidArgumentException('Please specify a "baseurl" when using "download"=1');
+		if($doDownload && !$oldBaseUrl) {
+			throw new InvalidArgumentException('Please specify a "oldBaseUrl" when using "download"=1');
 		}
 
 		// Import users: Needs to happen first so we can establish relations later
@@ -54,7 +55,7 @@ class DrupalBlogImporterTask extends BuildTask {
 			$postLoader = $this->getPostLoader();
 			$postResult = $postLoader
 				->setPublish($doPublish)
-				->setDrupalBaseUrl($baseUrl)
+				->setOldBaseUrl($oldBaseUrl)
 				->load($postFile);
 			$this->log(sprintf(
 				'Created %d, updated %d, deleted %d',
@@ -98,6 +99,14 @@ class DrupalBlogImporterTask extends BuildTask {
 		}
 
 		if($rules = $this->getPostLoader()->getRewriteRules()) {
+			// Optionally prefix with a base url to the SilverStripe installation.
+			// Useful if the old and new domains don't match, and the rewrite rules
+			// need to be used on a different host.
+			if($newBaseUrl) {
+				foreach($rules as $old => $new) {
+					$rules[$old] = trim($newBaseUrl, '/') . $new;
+				}
+			}
 			$this->log('-----------------------------------------------');
 			$this->log(sprintf("Rewrite rules for Apache: \n\n%s", $rules));
 		}
