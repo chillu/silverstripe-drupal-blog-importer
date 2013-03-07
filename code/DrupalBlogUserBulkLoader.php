@@ -4,6 +4,8 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 	public $columnMap = array(
 		'uid' => 'DrupalUid', // requires DrupalMemberExtension
 		'title' => 'Nickname', // requires DrupalMemberExtension
+		'mail' => 'Email',
+		'name' => '->importName',
 		'created' => 'Created',
 		'changed' => 'LastEdited',
 	);
@@ -36,6 +38,12 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 				$this->columnMap['title']
 			));
 		}
+	}
+
+	protected function importName($obj, $val, $record) {
+		$parts = preg_split('/\s/', $val, 2);
+		$obj->FirstName = $parts[0];
+		if(isset($parts[1])) $obj->Surname = $parts[1];
 	}
 
 	protected function findDuplicateByUid($uid, $record) {

@@ -22,6 +22,10 @@ class DrupalBlogUserBulkLoaderTest extends SapphireTest {
 		$this->assertContains('201', $created->column('DrupalUid'));
 		$this->assertContains('202', $created->column('DrupalUid'));
 		$this->assertContains('203', $created->column('DrupalUid'));
+		$this->assertContains('John', $created->column('FirstName'));
+		$this->assertContains('Jane', $created->column('FirstName'));
+		$this->assertContains('Jack', $created->column('FirstName'));
+		$this->assertContains('Doe Smith', $created->column('Surname'));
 	}
 	
 }

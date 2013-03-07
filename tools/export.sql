@@ -3,26 +3,30 @@ SELECT
 	'nid',
 	'uid',
 	'title',
+	'name',
+	'mail',
 	'created',
 	'changed'
 UNION ALL
 SELECT
-	users.nid,
-	users.uid,
-	users.title,
-	FROM_UNIXTIME(users.created) AS 'created',
-	FROM_UNIXTIME(users.changed) AS 'changed'
+	node.nid,
+	node.uid,
+	node.title,
+	users.name,
+	users.mail,
+	FROM_UNIXTIME(node.created-3600) AS 'created',
+	FROM_UNIXTIME(node.changed-3600) AS 'changed'
 FROM 
-	node AS users
-	LEFT JOIN comments ON comments.uid = users.uid
-	LEFT JOIN node AS blogposts ON blogposts.uid = users.uid AND blogposts.type = 'column'
+	LEFT JOIN node ON users.uid = node.uid
+	LEFT JOIN comments ON comments.uid = node.uid
+	LEFT JOIN node AS blogposts ON blogposts.uid = node.uid AND blogposts.type = 'column'
 WHERE
-	users.type = 'usernode'
+	node.type = 'usernode'
 	AND (
 		comments.nid IS NOT NULL
 		OR blogposts.nid IS NOT NULL
 	)
-GROUP BY users.uid
+GROUP BY node.uid
 INTO OUTFILE '/tmp/users.csv'
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
