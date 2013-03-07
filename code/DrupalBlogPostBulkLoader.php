@@ -88,7 +88,8 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 				// TODO Fix relative images
 				$newImageUrl = rtrim($this->imagePath, '/')  . '/' . ltrim($oldImageUrlNormalized, '/');
-				$this->images[rtrim($this->getOldBaseUrl(), '/') . '/' . trim($oldImageUrlNormalized, '')] = $newImageUrl;
+				$oldImageUrlAbs = rtrim($this->getOldBaseUrl(), '/') . '/' . trim($oldImageUrlNormalized, '/');
+				$this->images[$oldImageUrlAbs] = $newImageUrl;
 				// TODO More robust replacement
 				$obj->Content = str_replace($oldImageUrl, $newImageUrl, $obj->Content);
 			}
