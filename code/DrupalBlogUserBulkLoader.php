@@ -16,28 +16,14 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 		),
 		'Nickname' => array(
 			'callback' => 'findDuplicateByTitle'
+		),
+		'Email' => array(
+			'callback' => 'findDuplicateByEmail'
 		)
 	);
 	
 	public function __construct($objectClass = 'Member') {
 		parent::__construct($objectClass);
-
-		$canMapUid = (
-			isset($this->columnMap['uid']) 
-			&& singleton($objectClass)->hasDatabaseField($this->columnMap['uid'])
-		);
-		$canMapTitle = (
-			isset($this->columnMap['title']) 
-			&& singleton($objectClass)->hasDatabaseField($this->columnMap['title'])
-		);
-		if(!$canMapUid && !$canMapTitle) {
-			throw new LogicException(sprintf(
-				'The user importer requires a unique identifier field for "uid" or "title" ' .
-				'(expected "%s" or "%s")',
-				$this->columnMap['uid'],
-				$this->columnMap['title']
-			));
-		}
 	}
 
 	protected function importName($obj, $val, $record) {
@@ -46,15 +32,25 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 		if(isset($parts[1])) $obj->Surname = $parts[1];
 	}
 
+	protected function findDuplicateByEmail($email, $record) {
+		if(!$email) return;
+
+		return Member::get()->filter('Email', $email)->First();
+	}
+
 	protected function findDuplicateByUid($uid, $record) {
-		// Lookup is optional, fall back to title
+		if(!$uid) return;
+
+		// Lookup is optional, fall back to title or email
 		if(!singleton('Member')->hasDatabaseField($this->columnMap['uid'])) return;
 
 		return Member::get()->filter($this->columnMap['uid'], $uid)->First();
 	}
 
 	protected function findDuplicateByTitle($title, $record) {
-		// Lookup is optional, fall back to uid
+		if(!$title) return;
+
+		// Lookup is optional, fall back to uid or email
 		if(!singleton('Member')->hasDatabaseField($this->columnMap['title'])) return;
 
 		return Member::get()->filter($this->columnMap['title'], $title)->First();

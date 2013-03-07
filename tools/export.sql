@@ -17,6 +17,7 @@ SELECT
 	FROM_UNIXTIME(node.created-3600) AS 'created',
 	FROM_UNIXTIME(node.changed-3600) AS 'changed'
 FROM 
+	users
 	LEFT JOIN node ON users.uid = node.uid
 	LEFT JOIN comments ON comments.uid = node.uid
 	LEFT JOIN node AS blogposts ON blogposts.uid = node.uid AND blogposts.type = 'column'
