@@ -102,7 +102,7 @@ class DrupalBlogImporterTask extends BuildTask {
 			// Optionally prefix with a base url to the SilverStripe installation.
 			// Useful if the old and new domains don't match, and the rewrite rules
 			// need to be used on a different host.
-			if($newBaseUrl) {
+			if($rules && is_array($rules) && $newBaseUrl) {
 				foreach($rules as $old => $new) {
 					$rules[$old] = trim($newBaseUrl, '/') . $new;
 				}
