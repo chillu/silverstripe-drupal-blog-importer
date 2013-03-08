@@ -301,5 +301,9 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	public function getOldBaseUrl() {
 		return $this->oldBaseUrl;
 	}
+
+	public function getUrlMap() {
+		return $this->urlMap;
+	}
 	
 }
