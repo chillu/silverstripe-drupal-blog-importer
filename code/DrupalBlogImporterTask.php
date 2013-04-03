@@ -70,7 +70,7 @@ class DrupalBlogImporterTask extends BuildTask {
 				$batch = $downloader->download($images);
 				if($exceptions = $batch->getExceptions()) {
 					foreach($exceptions as $exception) {
-						$this->log($exception->getMessage());
+						$this->log(substr($exception->getMessage(), 0, 300) . '...');
 					}
 				}
 			}
