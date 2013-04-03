@@ -63,7 +63,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		$obj = BlogEntry::get()->byID($objID);
 
 		if($this->getImagePath()) {
-			$this->rewriteImages($obj);
+			$this->rewriteImages($obj, 'Content');
 		}
 
 		if($this->publish) $obj->publish('Stage', 'Live');
@@ -73,8 +73,8 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		return $objID;
 	}
 
-	protected function rewriteImages($obj) {
-		preg_match_all('/<img[^>]*>/', $obj->Content, $imageTags, PREG_SET_ORDER);
+	protected function rewriteImages($obj, $field) {
+		preg_match_all('/<img[^>]*>/', $obj->$field, $imageTags, PREG_SET_ORDER);
 		if($imageTags) {
 			foreach($imageTags as $imageTag) {
 				preg_match('/src=["\'](.+?)["\']/', $imageTag[0], $imageUrlMatch);
@@ -91,7 +91,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 				$oldImageUrlAbs = rtrim($this->getOldBaseUrl(), '/') . '/' . trim($oldImageUrlNormalized, '/');
 				$this->images[$oldImageUrlAbs] = $newImageUrl;
 				// TODO More robust replacement
-				$obj->Content = str_replace($oldImageUrl, $newImageUrl, $obj->Content);
+				$obj->$field = str_replace($oldImageUrl, $newImageUrl, $obj->$field);
 			}
 			$obj->write();
 		}
