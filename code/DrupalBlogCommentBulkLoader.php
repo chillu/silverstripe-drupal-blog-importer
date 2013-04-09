@@ -20,6 +20,17 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 		)
 	);
 
+	/**
+	 * - beforeProcessRecord($record, $columnMap, $result, $preview)
+	 * - afterProcessRecord($obj, $record, $columnMap, $result, $preview)
+	 * 
+	 * @var array
+	 */
+	public $listeners = array(
+		'beforeProcessRecord' => array(),
+		'afterProcessRecord' => array()
+	);
+
 	protected $_cache_holder;
 	protected $_cache_holders = array();
 	
@@ -41,6 +52,10 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	}
 
 	protected function processRecord($record, $columnMap, &$result, $preview = false) {
+		foreach($this->listeners['beforeProcessRecord'] as $listener) {
+			$listener($record, $columnMap, $result, $preview);
+		}
+
 		$page = $this->getPage($record);
 		if(!$page) {
 			// Mainly for testing, in real imports the posts should be present already
@@ -52,7 +67,7 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 				$holder->write();
 			}
 			$this->_cache_holder = $holder;
-			
+
 			$page = new BlogEntry(array(
 				'DrupalNid' => $record['nid'],
 				'ParentID' => $holder->ID
@@ -68,6 +83,10 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 		// Created gets overwritten on new records...
 		$obj->Created = $record['Created'];
 		$obj->write();
+
+		foreach($this->listeners['afterProcessRecord'] as $listener) {
+			$listener($obj, $record, $columnMap, $result, $preview);
+		}
 
 		return $objId;
 	}

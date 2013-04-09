@@ -120,20 +120,38 @@ class DrupalBlogImporterTask extends BuildTask {
 
 	public function getCommentLoader() {
 		if(!$this->commentLoader) $this->commentLoader = Injector::inst()->create('DrupalBlogCommentBulkLoader');
+
+		$self = $this;
+		$this->commentLoader->listeners['afterProcessRecord'][] = function($obj) use($self) {
+			$self->log(sprintf(' - %s (#%s)', $obj->Title, $obj->ID));
+		};
+		
 		return $this->commentLoader;
 	}
 
 	public function getPostLoader() {
 		if(!$this->postLoader) $this->postLoader = Injector::inst()->create('DrupalBlogPostBulkLoader');
+
+		$self = $this;
+		$this->postLoader->listeners['afterProcessRecord'][] = function($obj) use($self) {
+			$self->log(sprintf(' - %s (#%s)', $obj->Title, $obj->ID));
+		};
+
 		return $this->postLoader;
 	}
 
 	public function getUserLoader() {
 		if(!$this->userLoader) $this->userLoader = Injector::inst()->create('DrupalBlogUserBulkLoader');
+
+		$self = $this;
+		$this->userLoader->listeners['afterProcessRecord'][] = function($obj) use($self) {
+			$self->log(sprintf(' - %s (#%s)', $obj->Title, $obj->ID));
+		};
+		
 		return $this->userLoader;
 	}
 
-	protected function log($msg) {
+	public function log($msg) {
 		echo $msg . "\n";
 	}
 

@@ -50,6 +50,17 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		)
 	);
 
+	/**
+	 * - beforeProcessRecord($record, $columnMap, $result, $preview)
+	 * - afterProcessRecord($obj, $record, $columnMap, $result, $preview)
+	 * 
+	 * @var array
+	 */
+	public $listeners = array(
+		'beforeProcessRecord' => array(),
+		'afterProcessRecord' => array()
+	);
+
 	protected $_cache_tree;
 	protected $_cache_holders = array();
 	protected $_cache_categories = array();
@@ -61,6 +72,10 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	}
 
 	protected function processRecord($record, $columnMap, &$result, $preview = false) {
+		foreach($this->listeners['beforeProcessRecord'] as $listener) {
+			$listener($record, $columnMap, $result, $preview);
+		}
+
 		// Find or create a holder for this blog
 		$holder = $this->getHolder($record);
 		$record['ParentID'] = $holder->ID;
@@ -75,6 +90,10 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		if($this->publish) $obj->publish('Stage', 'Live');
 
 		$this->urlMap[$record['dst']] = $obj->RelativeLink();
+
+		foreach($this->listeners['afterProcessRecord'] as $listener) {
+			$listener($obj, $record, $columnMap, $result, $preview);
+		}
 
 		return $objID;
 	}

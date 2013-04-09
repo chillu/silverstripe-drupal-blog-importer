@@ -21,9 +21,35 @@ class DrupalBlogUserBulkLoader extends CsvBulkLoader {
 			'callback' => 'findDuplicateByEmail'
 		)
 	);
+
+	/**
+	 * - beforeProcessRecord($record, $columnMap, $result, $preview)
+	 * - afterProcessRecord($obj, $record, $columnMap, $result, $preview)
+	 * 
+	 * @var array
+	 */
+	public $listeners = array(
+		'beforeProcessRecord' => array(),
+		'afterProcessRecord' => array()
+	);
 	
 	public function __construct($objectClass = 'Member') {
 		parent::__construct($objectClass);
+	}
+
+	protected function processRecord($record, $columnMap, &$result, $preview = false) {
+		foreach($this->listeners['beforeProcessRecord'] as $listener) {
+			$listener($record, $columnMap, $result, $preview);
+		}
+
+		$objID = parent::processRecord($record, $columnMap, $result, $preview);
+		$obj = Member::get()->byID($objID);
+
+		foreach($this->listeners['afterProcessRecord'] as $listener) {
+			$listener($obj, $record, $columnMap, $result, $preview);
+		}
+
+		return $objID;
 	}
 
 	protected function importName($obj, $val, $record) {
