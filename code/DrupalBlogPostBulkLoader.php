@@ -50,6 +50,12 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 		)
 	);
 
+	protected $_cache_tree;
+	protected $_cache_holders = array();
+	protected $_cache_categories = array();
+	protected $_cache_memberByNickname = array();
+	protected $_cache_memberByUid = array();
+
 	public function __construct($objectClass = 'BlogEntry') {
 		parent::__construct($objectClass);
 	}
@@ -114,30 +120,39 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	protected function getHolder($record) {
 		$filter = new URLSegmentFilter();
 		$urlSegment = $filter->filter($record['blog_path']);
-		$tree = BlogTree::get()->filter(array(
-			'Title' => 'Blogs'
-		))->First();
+		
+		$tree = $this->_cache_tree;
 		if(!$tree) {
-			$tree = new BlogTree(array(
-				'Title' => 'Blogs',
-				'ParentID' => $this->parentId,
-			));
-			$tree->write();
-			if($this->publish) $tree->publish('Stage', 'Live');
+			$tree = BlogTree::get()->filter(array(
+				'Title' => 'Blogs'
+			))->First();
+			if(!$tree) {
+				$tree = new BlogTree(array(
+					'Title' => 'Blogs',
+					'ParentID' => $this->parentId,
+				));
+				$tree->write();
+				if($this->publish) $tree->publish('Stage', 'Live');
+			}
+			$this->_cache_tree = $tree;
 		}
 
-		$holder = BlogHolder::get()->filter(array(
-			'URLSegment' => $urlSegment,
-			'ParentID' => $tree->ID
-		))->First();
+		$holder = (isset($this->_cache_holders[$urlSegment])) ? $this->_cache_holders[$urlSegment] : null;
 		if(!$holder) {
-			$holder = new BlogHolder(array(
-				'Title' => $record['blog_title'],
+			$holder = BlogHolder::get()->filter(array(
 				'URLSegment' => $urlSegment,
-				'ParentID' => $tree->ID,
-			));
-			$holder->write();
-			if($this->publish) $holder->publish('Stage', 'Live');
+				'ParentID' => $tree->ID
+			))->First();
+			if(!$holder) {
+				$holder = new BlogHolder(array(
+					'Title' => $record['blog_title'],
+					'URLSegment' => $urlSegment,
+					'ParentID' => $tree->ID,
+				));
+				$holder->write();
+				if($this->publish) $holder->publish('Stage', 'Live');
+			}	
+			$this->_cache_holders[$urlSegment] = $holder;
 		}
 
 		return $holder;
@@ -184,12 +199,20 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 
 			// Try importing by UID
 			if(!$member && $hasUidField) {
-				$member = Member::get()->filter('DrupalUid', $val)->First();
+				$member = (isset($this->_cache_memberByUid[$val])) ? $this->_cache_memberByUid[$val] : null;
+				if(!$member) {
+					$member = Member::get()->filter('DrupalUid', $val)->First();	
+					$this->_cache_memberByUid[$val] = $member;
+				}
 			}
 
 			// Fall back to Nickname
 			if(!$member && $hasNicknameField) {
-				$member = Member::get()->filter('Nickname', $record['Author'])->First();
+				$member = (isset($this->_cache_memberByNickname[$val])) ? $this->_cache_memberByNickname[$val] : null;
+				if(!$member) {
+					$member = Member::get()->filter('Nickname', $record['Author'])->First();	
+					$this->_cache_memberByNickname[$val] = $member;
+				}
 			}
 
 			// Fall back to creating a member
@@ -228,16 +251,19 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 			foreach($tags as $tag) {
 				if(!$tag) continue;
 
-				$cat = BlogCategory::get()->filter(array(
-					'Title' => $tag,
-				))->First();
+				$cat = (isset($this->_cache_categories[$tag])) ? $this->_cache_categories[$tag] : null;
 				if(!$cat) {
-					$cat = new BlogCategory(array(
-						'Title' => $tag
-					));
+					$cat = BlogCategory::get()->filter(array(
+						'Title' => $tag,
+					))->First();
+					if(!$cat) {
+						$cat = new BlogCategory(array(
+							'Title' => $tag
+						));
+					}
+					$cat->write();
+					$this->_cache_categories[$tag] = $cat;
 				}
-				
-				$cat->write();
 
 				$obj->BlogCategories()->add($cat);
 

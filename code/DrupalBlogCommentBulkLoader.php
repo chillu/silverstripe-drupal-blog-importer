@@ -19,6 +19,9 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 			'callback' => 'findDuplicateByCid'
 		)
 	);
+
+	protected $_cache_holder;
+	protected $_cache_holders = array();
 	
 	public function __construct($objectClass = 'Comment') {
 		parent::__construct($objectClass);
@@ -29,18 +32,27 @@ class DrupalBlogCommentBulkLoader extends CsvBulkLoader {
 	}
 
 	protected function getPage($record) {
-		return BlogEntry::get()->filter('DrupalNid', $record['nid'])->First();
+		$page = (isset($this->_cache_holders[$record['nid']])) ? $this->_cache_holders[$record['nid']] : null;
+		if(!$page) {
+			$page = BlogEntry::get()->filter('DrupalNid', $record['nid'])->First();
+			$this->_cache_holders[$record['nid']] = $page;
+		}
+		return $page;
 	}
 
 	protected function processRecord($record, $columnMap, &$result, $preview = false) {
 		$page = $this->getPage($record);
 		if(!$page) {
 			// Mainly for testing, in real imports the posts should be present already
-			$holder = BlogHolder::get()->First();
+			if(!$holder = $this->_cache_holder) {
+				$holder = BlogHolder::get()->First();;	
+			}
 			if(!$holder) {
 				$holder = new BlogHolder();
 				$holder->write();
 			}
+			$this->_cache_holder = $holder;
+			
 			$page = new BlogEntry(array(
 				'DrupalNid' => $record['nid'],
 				'ParentID' => $holder->ID

@@ -11,5 +11,9 @@ class DrupalBlogEntryExtension extends DataExtension {
 	static $has_one = array(
 		'Author' => 'Member'
 	);
+
+	static $indexes = array(
+		'DrupalNid' => true,
+	);
 	
 }
