@@ -4,14 +4,14 @@
  */
 class DrupalCommentExtension extends DataExtension {
 
-	static $db = array(
+	private static $db = array(
 		'DrupalCid' => 'Int',
 		'Subject' => 'Text',
 		'Hostname' => 'Text',
 		'Email' => 'Text',
 	);
 
-	static $has_one = array(
+	private static $has_one = array(
 		'Author' => 'Member'
 	);
 	

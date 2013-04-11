@@ -4,15 +4,15 @@
  */
 class DrupalBlogEntryExtension extends DataExtension {
 
-	static $db = array(
+	private static $db = array(
 		'DrupalNid' => 'Int',
 	);
 
-	static $has_one = array(
+	private static $has_one = array(
 		'Author' => 'Member'
 	);
 
-	static $indexes = array(
+	private static $indexes = array(
 		'DrupalNid' => true,
 	);
 	

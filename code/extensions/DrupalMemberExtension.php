@@ -4,7 +4,7 @@
  */
 class DrupalMemberExtension extends DataExtension {
 
-	static $db = array(
+	private static $db = array(
 		'DrupalUid' => 'Int',
 		'Nickname' => 'Varchar(255)',
 	);
