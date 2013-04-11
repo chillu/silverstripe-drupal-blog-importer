@@ -6,8 +6,18 @@ class DrupalBlogCommentBulkLoaderTest extends SapphireTest {
 	protected $requiredExtensions = array(
 		'Member' => array('DrupalMemberExtension'),
 		'BlogEntry' => array('DrupalBlogEntryExtension'),
-		'Comment' => array('DrupalCommentExtension'),
 	);
+
+	function setUp() {
+		parent::setUp();
+
+		if(!class_exists('Comment')) {
+			$this->markTestSkipped('"Comment" module not installed');
+			return;
+		}
+
+		Comment::add_extension('DrupalCommentExtension');
+	}
 
 	public function testImport() {
 		$loader = new DrupalBlogCommentBulkLoader();

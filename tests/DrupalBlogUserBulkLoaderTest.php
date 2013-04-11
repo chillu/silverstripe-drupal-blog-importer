@@ -6,7 +6,6 @@ class DrupalBlogUserBulkLoaderTest extends SapphireTest {
 	protected $requiredExtensions = array(
 		'Member' => array('DrupalMemberExtension'),
 		'BlogEntry' => array('DrupalBlogEntryExtension'),
-		'Comment' => array('DrupalCommentExtension'),
 	);
 
 	public function testImport() {
