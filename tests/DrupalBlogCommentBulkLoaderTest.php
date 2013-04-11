@@ -8,18 +8,19 @@ class DrupalBlogCommentBulkLoaderTest extends SapphireTest {
 		'BlogEntry' => array('DrupalBlogEntryExtension'),
 	);
 
-	function setUp() {
-		parent::setUp();
-
-		if(!class_exists('Comment')) {
-			$this->markTestSkipped('"Comment" module not installed');
-			return;
+	function setUpOnce() {
+		if(class_exists('Comment')) {
+			Comment::add_extension('DrupalCommentExtension');	
 		}
 
-		Comment::add_extension('DrupalCommentExtension');
+		parent::setUpOnce();
 	}
 
 	public function testImport() {
+		if(!class_exists('Comment')) {
+			$this->markTestSkipped('"Comment" module not installed');
+		}
+
 		$loader = new DrupalBlogCommentBulkLoader();
 		$result = $loader->load(BASE_PATH . '/drupal-blog-importer/tests/fixtures/comments.csv');
 		
@@ -38,6 +39,10 @@ class DrupalBlogCommentBulkLoaderTest extends SapphireTest {
 	}
 
 	public function testCreatesNewMembers() {
+		if(!class_exists('Comment')) {
+			$this->markTestSkipped('"Comment" module not installed');
+		}
+
 		$loader = new DrupalBlogCommentBulkLoader();
 		$result = $loader->load(BASE_PATH . '/drupal-blog-importer/tests/fixtures/comments.csv');
 
@@ -54,6 +59,10 @@ class DrupalBlogCommentBulkLoaderTest extends SapphireTest {
 	}
 
 	public function testLinksExistingMembers() {
+		if(!class_exists('Comment')) {
+			$this->markTestSkipped('"Comment" module not installed');
+		}
+
 		// Data matching comments.csv fixture
 		$user1 = new Member(array('Nickname' => 'user1'));
 		$user1->write();
