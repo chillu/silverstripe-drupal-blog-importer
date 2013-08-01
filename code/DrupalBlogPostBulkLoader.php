@@ -184,7 +184,7 @@ class DrupalBlogPostBulkLoader extends CsvBulkLoader {
 	/**
 	 * @return String Apache rewrite rules from a previous import.
 	 */
-	public function getRewriteRules() {
+	public function getRewriteRules($newBaseUrl = null) {
 		$rules = array();
 		foreach($this->urlMap as $before => $after) {
 			$rules[] = sprintf(
